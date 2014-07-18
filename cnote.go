@@ -229,7 +229,7 @@ func main() {
 		},
 		{
 			Name:  "dump",
-			Usage: "dump whole database",
+			Usage: "Dump whole database",
 			Action: func(c *cli.Context) {
 				notedb.Dump()
 			},
