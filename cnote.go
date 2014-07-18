@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/astaxie/beego/logs"
 	"github.com/codegangsta/cli"
 	"github.com/shenwei356/cnote/note"
 )
@@ -15,7 +14,6 @@ import (
 var (
 	funcs  map[string]func(c *cli.Context)
 	DBFILE string
-	log    *logs.BeeLogger
 	notedb *note.NoteDB
 )
 
@@ -26,10 +24,6 @@ func init() {
 		os.Exit(1)
 	}
 	DBFILE = filepath.Join(usr.HomeDir, ".cnote")
-
-	// logger
-	log := logs.NewLogger(10000)
-	log.SetLogger("console", "")
 
 	funcs = make(map[string]func(c *cli.Context))
 	funcs["new"] = funNew
