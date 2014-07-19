@@ -12,8 +12,12 @@ Cnote stores all data in a embedded database [goleveldb](https://github.com/synd
 Dependencies
 ------------
 
-No. And it's platform independent, thanks for [golang](http://golang.org).
+No. Thanks for [golang](http://golang.org).
 
+Try It
+------
+
+Download from my personal site: [cnoteV1.1.zip](http://blog.shenwei.me/?wpdmact=process&did=Ni5ob3RsaW5r)
 
 Usage
 -----
