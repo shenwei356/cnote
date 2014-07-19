@@ -1,0 +1,6 @@
+config	{"current_note_name":"fruit"}
+item_fruit_000000001	{"itemid":"1","tags":["red","green"],"content":"apple"}
+item_fruit_000000002	{"itemid":"2","tags":["green","yellow"],"content":"pear"}
+item_fruit_000000003	{"itemid":"3","tags":["yellow"],"content":"banana"}
+note_fruit	{"noteid":"fruit","sum":3,"last_update":"2014-07-20 04:13:00 +0800 CST","last_id":3,"tags":{"green":{"1":true,"2":true},"red":{"1":true},"yellow":{"2":true,"3":true}}}
+note_people	{"noteid":"people","sum":0,"last_update":"2014-07-20 04:07:00 +0800 CST","last_id":0,"tags":{}}

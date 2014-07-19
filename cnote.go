@@ -1,20 +1,22 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"strconv"
 
 	"github.com/codegangsta/cli"
-	"github.com/shenwei356/cnote/note"
+	"github.com/shenwei356/cnote/cnotedb"
 )
 
 var (
 	funcs  map[string]func(c *cli.Context)
 	DBFILE string
-	notedb *note.NoteDB
+	notedb *cnotedb.NoteDB
 )
 
 func init() {
@@ -30,10 +32,17 @@ func init() {
 	funcs["del"] = funDel
 	funcs["use"] = funUse
 	funcs["list"] = funLs
+
 	funcs["add"] = funAdd
 	funcs["rm"] = funRm
+
 	funcs["tag"] = funTag
 	funcs["search"] = funSearch
+
+	funcs["dump"] = funDump
+	funcs["wipe"] = funWipe
+	funcs["restore"] = funRestore
+	funcs["import"] = funImport
 
 }
 
@@ -48,9 +57,28 @@ func getFunc(funcs map[string]func(c *cli.Context), name string) func(c *cli.Con
 }
 
 func funLs(c *cli.Context) {
-	list := notedb.NotesList
-	for _, notename := range list {
-		fmt.Println(notename)
+	if len(c.Args()) > 0 {
+		fmt.Println("no arguments should be given.")
+		return
+	}
+
+	for _, notename := range notedb.NotesList {
+
+		// read note
+		note, err := notedb.ReadNote(notename)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(0)
+		}
+
+		fmt.Printf("note: %s\t(#. of items: %d, last update: %s).",
+			notename, note.Sum, note.LastUpdate)
+		if notedb.CurrentNote != nil &&
+			notename == notedb.CurrentNote.NoteID {
+
+			fmt.Printf(" (current note)")
+		}
+		fmt.Println()
 	}
 }
 
@@ -69,7 +97,9 @@ func funNew(c *cli.Context) {
 	err := notedb.NewNote(notename)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
+
 	fmt.Printf("note \"%s\" created.\n", notename)
 	fmt.Printf("current note: \"%s\".\n", notename)
 }
@@ -81,7 +111,7 @@ func funDel(c *cli.Context) {
 	}
 
 	for _, notename := range c.Args() {
-		err := notedb.DelNote(notename)
+		err := notedb.DeleteNote(notename)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -108,7 +138,8 @@ func funUse(c *cli.Context) {
 		return
 	}
 
-	fmt.Printf("current note: \"%s\".\n", notename)
+	fmt.Printf("current note: \"%s\" (last update: %s).\n",
+		notename, notedb.CurrentNote.LastUpdate)
 }
 
 func funAdd(c *cli.Context) {
@@ -117,10 +148,13 @@ func funAdd(c *cli.Context) {
 		return
 	}
 
-	err := notedb.AddNoteItem(c.Args()[0], c.Args()[1])
+	item, err := notedb.AddNoteItem(c.Args()[0], c.Args()[1])
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
+
+	fmt.Println(item)
 }
 
 func funRm(c *cli.Context) {
@@ -143,15 +177,33 @@ func funRm(c *cli.Context) {
 			continue
 		}
 
-		// fmt.Printf("note item \"%d\" deleted from note \"%s\".\n", itemid, notedb.CurrentNote.NoteID)
+		// fmt.Printf("note item \"%d\" deleted from note \"%s\".\n", itemid, notedb.Currentcnote.NoteID)
 	}
 }
 
 func funTag(c *cli.Context) {
-	err := notedb.ListByTag(c.Args())
+	// list all tags
+	note, err := notedb.GetCurrentNote()
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(0)
+	}
+
+	if len(c.Args()) == 0 {
+		for tag, taginfo := range note.Tags {
+			fmt.Printf("tag: %s\t(#. of items: %d).\n", tag, len(taginfo))
+		}
 		return
+	}
+
+	items, err := notedb.ItemByTag(c.Args())
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
+
+	for _, item := range items {
+		fmt.Println(item)
 	}
 }
 
@@ -160,20 +212,118 @@ func funSearch(c *cli.Context) {
 		fmt.Println("search keyword needed.")
 		return
 	}
-	err := notedb.Search(c.Args())
+
+	items, err := notedb.ItemByRegexp(c.Args())
 	if err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(0)
+	}
+
+	for _, item := range items {
+		fmt.Println(item)
 	}
 }
 
+func funDump(c *cli.Context) {
+	if len(c.Args()) > 0 {
+		fmt.Println("no arguments should be given.")
+		return
+	}
+
+	err := notedb.Dump()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
+}
+
+func request_reply(reply string) (bool, error) {
+	fmt.Printf("Attention, it will clear all the data."+
+		" type \"%s\" to continue:", reply)
+
+	reader := bufio.NewReader(os.Stdin)
+	str, err := reader.ReadString('\n')
+	if err != nil {
+		return false, err
+	}
+
+	str = regexp.MustCompile(`[\r\n]`).ReplaceAllString(str, "")
+	str = regexp.MustCompile(`^\s+|\s+$`).ReplaceAllString(str, "")
+	if str != "yes" {
+		fmt.Println("\ngiven up.")
+		return false, nil
+	}
+	return true, nil
+}
+
+func funWipe(c *cli.Context) {
+	if len(c.Args()) > 0 {
+		fmt.Println("no arguments should be given.")
+		return
+	}
+
+	reply, err := request_reply("yes")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
+
+	if reply == false {
+		return
+	}
+
+	err = notedb.Wipe()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
+}
+
+func funRestore(c *cli.Context) {
+	if len(c.Args()) != 1 {
+		fmt.Println("dumpped filename needed.")
+		return
+	}
+
+	reply, err := request_reply("yes")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
+
+	if reply == false {
+		return
+	}
+
+	err = notedb.Restore(c.Args().First())
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
+}
+
+func funImport(c *cli.Context) {
+	if len(c.Args()) != 3 {
+		fmt.Println("three arguments needed: <notename in your cnote>" +
+			" <notename in dumpped note> <dumpped filename>.")
+		return
+	}
+	notename, othernotename, filename := c.Args()[0], c.Args()[1], c.Args()[2]
+	n, err := notedb.Import(notename, othernotename, filename)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
+	fmt.Printf("%d items imported into note \"%s\".\n", n, notename)
+}
+
 func main() {
-	notedb = note.NewNoteDB(DBFILE)
+	notedb = cnotedb.NewNoteDB(DBFILE)
 
 	app := cli.NewApp()
 	app.Name = "cnote"
 	app.Usage = "A command line note app. https://github.com/shenwei356/cnote"
-	app.Version = "1.0 (2014-07-18)"
+	app.Version = "1.1 (2014-07-20)"
 	app.Author = "Wei Shen"
 	app.Email = "shenwei356@gmail.com"
 
@@ -210,23 +360,36 @@ func main() {
 			Action: getFunc(funcs, "rm"),
 		},
 		{
-			Name:      "search",
-			ShortName: "s",
-			Usage:     "Search for",
-			Action:    getFunc(funcs, "search"),
-		},
-		{
 			Name:      "tag",
 			ShortName: "t",
 			Usage:     "List items by tags",
 			Action:    getFunc(funcs, "tag"),
 		},
 		{
-			Name:  "dump",
-			Usage: "Dump whole database",
-			Action: func(c *cli.Context) {
-				notedb.Dump()
-			},
+			Name:      "search",
+			ShortName: "s",
+			Usage:     "Search for",
+			Action:    getFunc(funcs, "search"),
+		},
+		{
+			Name:   "dump",
+			Usage:  "Dump whole database, for backup or transfer",
+			Action: getFunc(funcs, "dump"),
+		},
+		{
+			Name:   "wipe",
+			Usage:  "Attention! Wipe whole database",
+			Action: getFunc(funcs, "wipe"),
+		},
+		{
+			Name:   "restore",
+			Usage:  "Wipe whole database, and restore from dumpped file",
+			Action: getFunc(funcs, "restore"),
+		},
+		{
+			Name:   "import",
+			Usage:  "Import note items from dumpped data",
+			Action: getFunc(funcs, "import"),
 		},
 	}
 

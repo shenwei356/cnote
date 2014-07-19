@@ -1,7 +1,9 @@
 cnote
 =====
 
-A command line note app.
+A **platform independent** command line note app.
+
+Cnote supports **backup** and **restoring** from backup, you can also **import** notes from backup of others.
 
 With cnote, you can conveniently manage note in command line. By the way, I installed a drop-down terminal [Yakuake](http://yakuake.kde.org), so I can call the terminal with a shortcut.
 
@@ -15,6 +17,7 @@ No. And it's platform independent, thanks for [golang](http://golang.org).
 
 Usage
 -----
+
     USAGE:
        cnote command [arguments...]
     
@@ -29,50 +32,122 @@ Usage
        search, s    Search for
        tag, t       List items by tags
        
-       dump         Dump whole database
+       dump         Dump whole database, for backup or transfer
+       wipe         Attention! Wipe whole database
+       restore      Wipe whole database, and restore from dumpped file
+       import       Import note items from dumpped data
+       
        help, h      Shows a list of commands or help for one command
 
 
 Examples
 --------
 
-    # Create a new note
-    $ cnote new note1
-    note "note1" created.
-    current note: "note1".
+	############### Create a new note ###############
+
+	$ cnote new fruit
+	note "fruit" created.
+	current note: "fruit".
+	$ cnote new people
+	note "people" created.
+	current note: "people". 
+
+	############### List all notes ###############
+
+	$ cnote ls
+	note: fruit     (#. of items: 0, last update: 2014-07-20 04:07:00 +0800 CST).
+	note: people    (#. of items: 0, last update: 2014-07-20 04:07:00 +0800 CST). (current note)
+
+	############### Choose note fruit ###############
+
+	$ cnote use fruit
+	current note: "fruit" (last update: 2014-07-20 04:07:00 +0800 CST).
+
+    ############### Delete a new note ###############
     
-    # List all notes
-    $ cnote ls
-    note1
+    $ cnote del test
+
+    ###########################################################################    
     
-    # add a note item
-    $ cnote add tag1,tag2 "people mountain people sea"
-    $ cnote add "tag1,tag2" "good good study, day day up"
-    $ cnote add "tag3" "no zuo no nie"
-    
-    # List all tags
-    $ cnote tag
-    tag1
-    tag2
-    tag3
-    
-    # List items with a tag
-    $ cnote tag tag2
-    1: people mountain people sea
-    2: good good study, day day up
-    
-    # Search items by keyword
-    $ cnote search oo
-    2: good good study, day day up
-    
-    # Dump whole database
-    $ cnote dump
-    "config":{"current_note_name":"note1"},
-    "item_note1_000000001":{"itemid":"1","tags":["tag1","tag2"],"content":"people mountain people sea"},
-    "item_note1_000000002":{"itemid":"2","tags":["tag1","tag2"],"content":"good good study, day day up"},
-    "item_note1_000000003":{"itemid":"3","tags":["tag3"],"content":"no zuo no nie"},
-    "note_note1":{"noteid":"note1","sum":3,"last_update":"2014-07-18 21:49:00 +0800 CST","last_id":3,"tags":{"tag1":{"1":true,"2":true},"tag2":{"1":true,"2":true},"tag3":{"3":true}}},
-    
+	############### add note item ###############
+
+	$ cnote add red,green apple
+	item: 1 (tags: [red green])     apple
+	$ cnote add green,yellow pear
+	item: 2 (tags: [green yellow])  pear
+	$ cnote add yellow banana
+	item: 3 (tags: [yellow])        banana
+
+	############### Show all tags ###############
+
+	$ cnote tag
+	tag: green      (#. of items: 2).
+	tag: red        (#. of items: 1).
+	tag: yellow     (#. of items: 2).
+
+	############### Show items by tag ###############
+
+	$ cnote tag yellow
+	item: 2 (tags: [green yellow])  pear
+	item: 3 (tags: [yellow])        banana
+
+	############### Search items by regrexp  ###############
+
+	$ cnote s ea
+	item: 2 (tags: [green yellow])  pear
+
+	############### Show all items, just search with .  ###############
+
+	$ cnote s .
+	item: 1 (tags: [red green])     apple
+	item: 2 (tags: [green yellow])  pear
+	item: 3 (tags: [yellow])        banana
+	
+	############### remove a note item ###############
+
+	$ cnote s .
+	item: 1 (tags: [red green])     apple
+	item: 2 (tags: [green yellow])  pear
+	item: 3 (tags: [yellow])        banana
+	$ cnote rm 2 
+	$ cnote s .
+	item: 1 (tags: [red green])     apple
+	item: 3 (tags: [yellow])        banana
+
+    ###########################################################################
+
+	############### Dump database for backup  ###############
+
+	$ cnote dump
+	config  {"current_note_name":"fruit"}
+	item_fruit_000000001    {"itemid":"1","tags":["red","green"],"content":"apple"}
+	item_fruit_000000002    {"itemid":"2","tags":["green","yellow"],"content":"pear"}
+	item_fruit_000000003    {"itemid":"3","tags":["yellow"],"content":"banana"}
+	note_fruit      {"noteid":"fruit","sum":3,"last_update":"2014-07-20 04:13:00 +0800 CST","last_id":3,"tags":{"green":{"1":true,"2":true},"red":{"1":true},"yellow":{"2":true,"3":true}}}
+	note_people     {"noteid":"people","sum":0,"last_update":"2014-07-20 04:07:00 +0800 CST","last_id":0,"tags":{}}
+
+	$ cnote dump > dumpdata 
+
+	############### Wipe whole database, and restore from dumpped file  ###############
+
+	$ cnote restore dumpdata 
+	Attention, it will clear all the data. type "yes" to continue:yes
+
+	############### Import note items from dumpped data  ###############
+
+	$ cnote import fruit fruit dumpdata 
+	3 items imported into note "fruit".
+	$ cnote dump
+	config  {"current_note_name":"fruit"}
+	item_fruit_000000001    {"itemid":"1","tags":["red","green"],"content":"apple"}
+	item_fruit_000000002    {"itemid":"2","tags":["green","yellow"],"content":"pear"}
+	item_fruit_000000003    {"itemid":"3","tags":["yellow"],"content":"banana"}
+	item_fruit_000000004    {"itemid":"4","tags":["red","green"],"content":"apple"}
+	item_fruit_000000005    {"itemid":"5","tags":["green","yellow"],"content":"pear"}
+	item_fruit_000000006    {"itemid":"6","tags":["yellow"],"content":"banana"}
+	note_fruit      {"noteid":"fruit","sum":6,"last_update":"2014-07-20 04:22:00 +0800 CST","last_id":6,"tags":{"green":{"1":true,"2":true,"4":true,"5":true},"red":{"1":true,"4":true},"yellow":{"2":true,"3":true,"5":true,"6":true}}}
+	note_people     {"noteid":"people","sum":0,"last_update":"2014-07-20 04:07:00 +0800 CST","last_id":0,"tags":{}}
+
 
 Copyright
 --------
