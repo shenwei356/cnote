@@ -5,19 +5,23 @@ A **platform independent** command line note app.
 
 Cnote supports **backup** and **restoring** from backup, you can also **import** notes from backup of others.
 
-With cnote, you can conveniently manage note in command line. By the way, I installed a drop-down terminal [Yakuake](http://yakuake.kde.org), so I can call the terminal with a shortcut.
+With cnote, you can conveniently manage note in command line. You can install a drop-down terminal like [Yakuake](http://yakuake.kde.org), so you can instantly call the terminal with a shortcut.
+
+Since cnote is a command line tool, it is suitabl suitable for plain text of tens of words. 
 
 Cnote stores all data in a embedded database [goleveldb](https://github.com/syndtr/goleveldb), an implementation of the LevelDB key/value database in the Go programming language. The path of database files is ```~/.cnote/``` in *nix operating system and ```C:\Users\Administrator\.cnote\``` in Windows 7 for example.
 
 Dependencies
 ------------
 
-No. Thanks for [golang](http://golang.org).
+No. Thanks for [golang](http://golang.org) and [goleveldb](https://github.com/syndtr/goleveldb).
 
-Try It
+Use It
 ------
 
-Download from my personal site: [cnoteV1.1.zip](http://blog.shenwei.me/?wpdmact=process&did=Ni5ob3RsaW5r)
+Download from [release page](https://github.com/shenwei356/cnote/releases) or from my personal site: [cnoteV1.1.zip](http://blog.shenwei.me/?wpdmact=process&did=Ni5ob3RsaW5r).
+
+If you uses golang, you know how to compile, right?
 
 Usage
 -----
