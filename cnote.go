@@ -319,6 +319,7 @@ func funImport(c *cli.Context) {
 
 func main() {
 	notedb = cnotedb.NewNoteDB(DBFILE)
+	defer notedb.Close()
 
 	app := cli.NewApp()
 	app.Name = "cnote"
@@ -394,6 +395,4 @@ func main() {
 	}
 
 	app.Run(os.Args)
-
-	notedb.Close()
 }
