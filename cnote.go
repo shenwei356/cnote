@@ -205,8 +205,14 @@ func funRm(c *cli.Context) {
 
 		itemid, err := strconv.Atoi(itemid)
 		if err != nil {
-			fmt.Println("item ID should be integer.")
+			fmt.Println("item ID should be positive integer.")
 			continue
+		}
+
+		// read item and print it, in case of misdeleteing
+		item, err = notedb.ReadNoteItem(note, itemid)
+		if err != nil {
+			return err
 		}
 
 		err = notedb.RemoveNoteItem(notedb.CurrentNote, itemid)
@@ -215,7 +221,7 @@ func funRm(c *cli.Context) {
 			continue
 		}
 
-		// fmt.Printf("note item \"%d\" deleted from note \"%s\".\n", itemid, notedb.Currentcnote.NoteID)
+		fmt.Println(item)
 	}
 }
 
