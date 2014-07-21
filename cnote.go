@@ -87,7 +87,7 @@ func funLs(c *cli.Context) {
 		note, err := notedb.ReadNote(notename)
 		if err != nil {
 			fmt.Println(err)
-			os.Exit(0)
+			return
 		}
 
 		fmt.Printf("note: %s\t(#. of items: %d, last update: %s).",
@@ -120,7 +120,8 @@ func funNew(c *cli.Context) {
 	}
 
 	fmt.Printf("note \"%s\" created.\n", notename)
-	fmt.Printf("current note: \"%s\".\n", notename)
+	fmt.Printf("current note: \"%s\" (last update: %s).\n",
+		notename, notedb.CurrentNote.LastUpdate)
 }
 
 func funDel(c *cli.Context) {
@@ -133,7 +134,7 @@ func funDel(c *cli.Context) {
 	note, err := notedb.ReadNote(notename)
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(0)
+		return
 	}
 
 	reply, err := request_reply(
@@ -145,7 +146,7 @@ func funDel(c *cli.Context) {
 		"yes")
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(0)
+		return
 	}
 
 	if reply == false {
@@ -155,7 +156,7 @@ func funDel(c *cli.Context) {
 	err = notedb.DeleteNote(notename)
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(0)
+		return
 	}
 }
 
@@ -210,9 +211,9 @@ func funRm(c *cli.Context) {
 		}
 
 		// read item and print it, in case of misdeleteing
-		item, err = notedb.ReadNoteItem(note, itemid)
+		item, err := notedb.ReadNoteItem(notedb.CurrentNote, itemid)
 		if err != nil {
-			return err
+			return
 		}
 
 		err = notedb.RemoveNoteItem(notedb.CurrentNote, itemid)
@@ -230,7 +231,7 @@ func funTag(c *cli.Context) {
 	note, err := notedb.GetCurrentNote()
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(0)
+		return
 	}
 
 	if len(c.Args()) == 0 {
@@ -243,7 +244,7 @@ func funTag(c *cli.Context) {
 	items, err := notedb.ItemByTag(c.Args())
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(0)
+		return
 	}
 
 	for _, item := range items {
@@ -260,7 +261,7 @@ func funSearch(c *cli.Context) {
 	items, err := notedb.ItemByRegexp(c.Args())
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(0)
+		return
 	}
 
 	for _, item := range items {
@@ -277,7 +278,7 @@ func funDump(c *cli.Context) {
 	err := notedb.Dump()
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(0)
+		return
 	}
 }
 
@@ -295,7 +296,7 @@ func funWipe(c *cli.Context) {
 		"yes")
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(0)
+		return
 	}
 
 	if reply == false {
@@ -305,7 +306,7 @@ func funWipe(c *cli.Context) {
 	err = notedb.Wipe()
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(0)
+		return
 	}
 }
 
@@ -323,7 +324,7 @@ func funRestore(c *cli.Context) {
 		"yes")
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(0)
+		return
 	}
 
 	if reply == false {
@@ -333,7 +334,7 @@ func funRestore(c *cli.Context) {
 	err = notedb.Restore(c.Args().First())
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(0)
+		return
 	}
 }
 
@@ -347,7 +348,7 @@ func funImport(c *cli.Context) {
 	n, err := notedb.Import(notename, othernotename, filename)
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(0)
+		return
 	}
 	fmt.Printf("%d items imported into note \"%s\".\n", n, notename)
 }
