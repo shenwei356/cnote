@@ -533,7 +533,7 @@ func (notedb *NoteDB) Dump() error {
 	for iter.Next() {
 		key := iter.Key()
 		value := iter.Value()
-		fmt.Printf("%s\t%s\n", key, value)
+		fmt.Printf("%s\t%s\r\n", key, value)
 	}
 	iter.Release()
 	err := iter.Error()
