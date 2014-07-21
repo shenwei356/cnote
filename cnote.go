@@ -46,6 +46,25 @@ func init() {
 
 }
 
+func request_reply(message, reply string) (bool, error) {
+	fmt.Printf(message, reply)
+
+	reader := bufio.NewReader(os.Stdin)
+	str, err := reader.ReadString('\n')
+	if err != nil {
+		return false, err
+	}
+
+	str = regexp.MustCompile(`[\r\n]`).ReplaceAllString(str, "")
+	str = regexp.MustCompile(`^\s+|\s+$`).ReplaceAllString(str, "")
+	if str != "yes" {
+		fmt.Println("\ngiven up.")
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func getFunc(funcs map[string]func(c *cli.Context), name string) func(c *cli.Context) {
 	if f, ok := funcs[name]; ok {
 		return f
@@ -109,15 +128,34 @@ func funDel(c *cli.Context) {
 		fmt.Println("note name needed.")
 		return
 	}
+	notename := c.Args().First()
 
-	for _, notename := range c.Args() {
-		err := notedb.DeleteNote(notename)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
+	note, err := notedb.ReadNote(notename)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
 
-		// fmt.Printf("note \"%s\" deleted.\n", notename)
+	reply, err := request_reply(
+		fmt.Sprintf("==============================================================\n"+
+			" Attention, it will delete all the %d items of note \"%s\".\n"+
+			"==============================================================\n",
+			note.Sum, notename)+
+			" Type \"%s\" to continue:",
+		"yes")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
+
+	if reply == false {
+		return
+	}
+
+	err = notedb.DeleteNote(notename)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
 	}
 }
 
@@ -237,32 +275,18 @@ func funDump(c *cli.Context) {
 	}
 }
 
-func request_reply(reply string) (bool, error) {
-	fmt.Printf("Attention, it will clear all the data."+
-		" type \"%s\" to continue:", reply)
-
-	reader := bufio.NewReader(os.Stdin)
-	str, err := reader.ReadString('\n')
-	if err != nil {
-		return false, err
-	}
-
-	str = regexp.MustCompile(`[\r\n]`).ReplaceAllString(str, "")
-	str = regexp.MustCompile(`^\s+|\s+$`).ReplaceAllString(str, "")
-	if str != "yes" {
-		fmt.Println("\ngiven up.")
-		return false, nil
-	}
-	return true, nil
-}
-
 func funWipe(c *cli.Context) {
 	if len(c.Args()) > 0 {
 		fmt.Println("no arguments should be given.")
 		return
 	}
 
-	reply, err := request_reply("yes")
+	reply, err := request_reply(
+		"========================================\n"+
+			" Attention, it will clear all the data.\n"+
+			"========================================\n"+
+			" Type \"%s\" to continue:",
+		"yes")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(0)
@@ -285,7 +309,12 @@ func funRestore(c *cli.Context) {
 		return
 	}
 
-	reply, err := request_reply("yes")
+	reply, err := request_reply(
+		"========================================\n"+
+			" Attention, it will clear all the data.\n"+
+			"========================================\n"+
+			" Type \"%s\" to continue:",
+		"yes")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(0)
