@@ -352,7 +352,7 @@ func main() {
 		},
 		{
 			Name:   "add",
-			Usage:  "add a note item",
+			Usage:  "Add a note item",
 			Action: getFunc(funcs, "add"),
 		},
 		{
@@ -363,13 +363,13 @@ func main() {
 		{
 			Name:      "tag",
 			ShortName: "t",
-			Usage:     "List items by tags",
+			Usage:     "List items by tags. List all tags if no arguments given",
 			Action:    getFunc(funcs, "tag"),
 		},
 		{
 			Name:      "search",
 			ShortName: "s",
-			Usage:     "Search for",
+			Usage:     "Search items with regular expression",
 			Action:    getFunc(funcs, "search"),
 		},
 		{

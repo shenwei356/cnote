@@ -35,10 +35,10 @@ Usage
        use          Select a note
        list, ls     List all notes
        
-       add          add a note item
+       add          Add a note item
        rm           Remove a note item
-       search, s    Search for
-       tag, t       List items by tags
+       tag, t       List items by tags. List all tags if no arguments given
+       search, s    Search items with regular expression
        
        dump         Dump whole database, for backup or transfer
        wipe         Attention! Wipe whole database
