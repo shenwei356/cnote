@@ -213,6 +213,7 @@ func funRm(c *cli.Context) {
 		// read item and print it, in case of misdeleteing
 		item, err := notedb.ReadNoteItem(notedb.CurrentNote, itemid)
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
 
