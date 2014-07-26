@@ -21,6 +21,7 @@ func init() {
 	// DBFILE
 	usr, err := user.Current()
 	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 	DBFILE = filepath.Join(usr.HomeDir, ".cnote")

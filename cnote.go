@@ -26,6 +26,19 @@ type Config struct {
 	CurrentNoteName string `json:"current_note_name"`
 }
 
+func (conf *Config) Clone() *Config {
+	c := new(Config)
+	c.CurrentNoteName = conf.CurrentNoteName
+	return c
+}
+
+func (conf *Config) IsEqualTo(c *Config) bool {
+	if conf.CurrentNoteName != c.CurrentNoteName {
+		return false
+	}
+	return true
+}
+
 type Note struct {
 	NoteID     string `json:"noteid"`
 	Sum        int    `json:"sum"`
@@ -56,6 +69,8 @@ type NoteDB struct {
 
 	db     *leveldb.DB
 	dbfile string
+
+	oldConfig *Config
 }
 
 func NewNoteDB(dbfile string) *NoteDB {
@@ -65,6 +80,7 @@ func NewNoteDB(dbfile string) *NoteDB {
 	notedb.ConnectDB()
 
 	notedb.ReadConfig()
+	notedb.oldConfig = notedb.Config.Clone()
 
 	// check the config
 	_, err := notedb.ReadNote(notedb.Config.CurrentNoteName)
@@ -104,7 +120,9 @@ func (notedb *NoteDB) ConnectDB() {
 }
 
 func (notedb *NoteDB) Close() {
-	notedb.SaveConfig()
+	if !notedb.Config.IsEqualTo(notedb.oldConfig) {
+		notedb.SaveConfig()
+	}
 	notedb.db.Close()
 }
 
