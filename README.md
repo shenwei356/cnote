@@ -21,33 +21,30 @@ Cnote is **only an executable binary file** without any data or configure files.
 Download
 --------
 
-[**Recommanded**] To compile with the newest source code, please use [gobuild - Cross-Platform Go Project Compiler](http://gobuild.io/download/github.com/shenwei356/cnote). It's simple and fast!
-
 Download lastest release from [release page](https://github.com/shenwei356/cnote/releases).
-
 
 Usage
 -----
 
     USAGE:
        cnote command [arguments...]
-    
+
     COMMANDS:
        new          Create a new note
        del          Delete a note
        use          Select a note
        list, ls     List all notes
-       
+
        add          Add a note item
        rm           Remove a note item
        tag, t       List items by tags. List all tags if no arguments given
        search, s    Search items with regular expression
-       
+
        dump         Dump whole database, for backup or transfer
        wipe         Attention! Wipe whole database
        restore      Wipe whole database, and restore from dumpped file
        import       Import note items from dumpped data
-       
+
        help, h      Shows a list of commands or help for one command
 
 
@@ -61,7 +58,7 @@ Examples
     current note: "fruit".
     $ cnote new people
     note "people" created.
-    current note: "people". 
+    current note: "people".
 
     ############### List all notes ###############
 
@@ -75,11 +72,11 @@ Examples
     current note: "fruit" (last update: 2014-07-20 04:07:00 +0800 CST).
 
     ############### Delete a new note ###############
-    
+
     $ cnote del test
 
     ###########################################################################    
-    
+
     ############### add note item ###############
 
     $ cnote add red,green apple
@@ -113,14 +110,14 @@ Examples
     item: 1 (tags: [red green])     apple
     item: 2 (tags: [green yellow])  pear
     item: 3 (tags: [yellow])        banana
-    
+
     ############### remove a note item ###############
 
     $ cnote s .
     item: 1 (tags: [red green])     apple
     item: 2 (tags: [green yellow])  pear
     item: 3 (tags: [yellow])        banana
-    $ cnote rm 2 
+    $ cnote rm 2
     $ cnote s .
     item: 1 (tags: [red green])     apple
     item: 3 (tags: [yellow])        banana
@@ -137,16 +134,16 @@ Examples
     note_fruit      {"noteid":"fruit","sum":3,"last_update":"2014-07-20 04:13:00 +0800 CST","last_id":3,"tags":{"green":{"1":true,"2":true},"red":{"1":true},"yellow":{"2":true,"3":true}}}
     note_people     {"noteid":"people","sum":0,"last_update":"2014-07-20 04:07:00 +0800 CST","last_id":0,"tags":{}}
 
-    $ cnote dump > dumpdata 
+    $ cnote dump > dumpdata
 
     ############### Wipe whole database, and restore from dumpped file  ###############
 
-    $ cnote restore dumpdata 
+    $ cnote restore dumpdata
     Attention, it will clear all the data. type "yes" to continue:yes
 
     ############### Import note items from dumpped data  ###############
 
-    $ cnote import fruit fruit dumpdata 
+    $ cnote import fruit fruit dumpdata
     3 items imported into note "fruit".
     $ cnote dump
     config  {"current_note_name":"fruit"}

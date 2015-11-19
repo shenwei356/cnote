@@ -400,7 +400,7 @@ func (notedb *NoteDB) ItemByRegexp(queries []string) ([]*Item, error) {
 				return nil, err
 			}
 
-			if _, ok := note.Items[itemid]; ok { // loaded
+			if _, ok := note.Items[itemid]; ok { // already loaded
 				continue
 			}
 
@@ -418,11 +418,11 @@ func (notedb *NoteDB) ItemByRegexp(queries []string) ([]*Item, error) {
 	for _, query := range queries {
 		re := regexp.MustCompile(query)
 
+		// sort itemids
 		itemids := make([]int, 0)
 		for itemid, _ := range note.Items {
 			itemids = append(itemids, itemid)
 		}
-
 		sort.Ints(itemids)
 
 		for _, itemid := range itemids {
@@ -450,16 +450,15 @@ func (notedb *NoteDB) ItemByTag(tags []string) ([]*Item, error) {
 			continue
 		}
 
+		// sort itemids
 		itemids := make([]int, 0)
 		for itemid, _ := range note.Tags[tag] {
 			itemid, err := strconv.Atoi(itemid)
 			if err != nil {
 				return nil, err
 			}
-
 			itemids = append(itemids, itemid)
 		}
-
 		sort.Ints(itemids)
 
 		for _, itemid := range itemids {
@@ -467,7 +466,6 @@ func (notedb *NoteDB) ItemByTag(tags []string) ([]*Item, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			items = append(items, item)
 		}
 	}
